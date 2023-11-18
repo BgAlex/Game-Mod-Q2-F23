@@ -28,6 +28,7 @@ static byte		is_silenced;
 
 
 void weapon_grenade_fire (edict_t *ent, qboolean held);
+void Machinegun_Fire(edict_t *ent);
 
 
 static void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
@@ -156,7 +157,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	if (other->client->pers.weapon != ent->item && 
 		(other->client->pers.inventory[index] == 1) &&
-		( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
+		( !deathmatch->value || other->client->pers.weapon == FindItem("pistol") ) )
 		other->client->newweapon = ent->item;
 
 	return true;
@@ -269,7 +270,7 @@ void NoAmmoWeaponChange (edict_t *ent)
 		ent->client->newweapon = FindItem ("shotgun");
 		return;
 	}
-	ent->client->newweapon = FindItem ("blaster");
+	ent->client->newweapon = FindItem ("pistol");
 }
 
 /*
@@ -808,7 +809,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 /*
 ======================================================================
 
-BLASTER / HYPERBLASTER
+HYPERBLASTER
 
 ======================================================================
 */
@@ -829,8 +830,9 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_bfg(ent, start, forward, damage, 500, 500);
-	//fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+	//fire_bfg(ent, start, forward, damage, 500, 500);
+	gi.bprintf(PRINT_HIGH, "PEW!");
+	fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -842,10 +844,13 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
+	
+	/*
 	if ( random() > random() * 2)
 	{
 		player_die(ent, ent, ent, -40, ent);
 	}
+	*/
 }
 
 
@@ -861,14 +866,78 @@ void Weapon_Blaster_Fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 }
 
+void Pistol_Fire(edict_t* ent, vec3_t g_offset, int damage)
+{
+	vec3_t	forward, right;
+	vec3_t	start;
+	vec3_t	offset;
+	int		kick;
+
+	kick = 2;
+
+	if (ent->client->pers.inventory[ent->client->ammo_index] < 1)
+	{
+		//ent->client->ps.gunframe = 6;
+		if (level.time >= ent->pain_debounce_time)
+		{
+			gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+			ent->pain_debounce_time = level.time + 1;
+		}
+		NoAmmoWeaponChange(ent);
+		return;
+	}
+
+	if (is_quad)
+	{
+		damage *= 4;
+		kick *= 4;
+	}
+	AngleVectors(ent->client->v_angle, forward, right, NULL);
+	VectorSet(offset, 24, 8, ent->viewheight - 8);
+	VectorAdd(offset, g_offset, offset);
+	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+	VectorScale(forward, -2, ent->client->kick_origin);
+	ent->client->kick_angles[0] = -1;
+
+	fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+
+	if (!((int)dmflags->value & DF_INFINITE_AMMO))
+		ent->client->pers.inventory[ent->client->ammo_index]--;
+
+	// send muzzle flash
+	gi.WriteByte(svc_muzzleflash);
+	gi.WriteShort(ent - g_edicts);
+	gi.WriteByte(MZ_MACHINEGUN | is_silenced);
+	gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+	PlayerNoise(ent, start, PNOISE_WEAPON);
+}
+
+void Weapon_Pistol_Fire(edict_t* ent)
+{
+	int damage;
+
+	damage = 10;
+	Pistol_Fire(ent, vec3_origin, damage);
+	ent->client->ps.gunframe++;
+}
+
 void Weapon_Blaster (edict_t *ent)
 {
 	static int	pause_frames[]	= {19, 32, 0};
 	static int	fire_frames[]	= {5, 0};
-
+	
 	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
 }
 
+void Weapon_Pistol(edict_t* ent)
+{
+	static int	pause_frames[] = { 19, 32, 0 };
+	static int	fire_frames[] = { 5, 0 };
+
+	Weapon_Generic(ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Pistol_Fire);
+}
 
 void Weapon_HyperBlaster_Fire (edict_t *ent)
 {
@@ -1153,6 +1222,7 @@ void Chaingun_Fire (edict_t *ent)
 		VectorSet(offset, 0, r, u + ent->viewheight-8);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
+		//fire_blaster(ent, start, forward, damage, 1000, EF_HYPERBLASTER, true);
 		fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
 	}
 

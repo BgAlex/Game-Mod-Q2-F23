@@ -25,6 +25,7 @@ void		Use_Weapon (edict_t *ent, gitem_t *inv);
 void		Drop_Weapon (edict_t *ent, gitem_t *inv);
 
 void Weapon_Blaster (edict_t *ent);
+void Weapon_Pistol(edict_t* ent);
 void Weapon_Shotgun (edict_t *ent);
 void Weapon_SuperShotgun (edict_t *ent);
 void Weapon_Machinegun (edict_t *ent);
@@ -501,7 +502,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 
 	if (weapon && !oldcount)
 	{
-		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
+		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("pistol") ) )
 			other->client->newweapon = ent->item;
 	}
 
@@ -1301,12 +1302,36 @@ always owned, never in the world
 /* pickup */	"Blaster",
 		0,
 		0,
-		NULL,
+		//NULL,
+		"Bullets",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_BLASTER,
 		NULL,
 		0,
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
+	},
+
+/* weapon_pistol (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_pistol",
+		NULL,
+		Use_Weapon,
+		NULL,
+		Weapon_Pistol,
+		"misc/w_pkup.wav",
+		NULL, 0,
+		"models/weapons/v_blast/tris.md2",
+/* icon */		"w_blaster",
+/* pickup */	"Pistol",
+		0,
+		0,
+		"Bullets",
+		IT_WEAPON | IT_STAY_COOP,
+		WEAP_BLASTER,
+		NULL,
+		0,
+		/* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
 	},
 
 /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1546,7 +1571,8 @@ always owned, never in the world
 /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_shells",
+		"ammo_bullets",
+		//"ammo_shells",
 		Pickup_Ammo,
 		NULL,
 		Drop_Ammo,
@@ -1569,7 +1595,8 @@ always owned, never in the world
 /*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_bullets",
+		"ammo_shells",
+		//"ammo_bullets",
 		Pickup_Ammo,
 		NULL,
 		Drop_Ammo,

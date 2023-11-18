@@ -1,6 +1,14 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  g_items.c
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(44,30): warning C4211: nonstandard extension used: redefined extern to static
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(45,30): warning C4211: nonstandard extension used: redefined extern to static
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(46,28): warning C4211: nonstandard extension used: redefined extern to static
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(706,45): warning C4100: 'item': unreferenced formal parameter
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(762,77): warning C4100: 'surf': unreferenced formal parameter
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(762,58): warning C4100: 'plane': unreferenced formal parameter
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(893,55): warning C4100: 'activator': unreferenced formal parameter
+C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\g_items.c(893,39): warning C4100: 'other': unreferenced formal parameter
   p_weapon.c
-C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\p_weapon.c(847,34): warning C4133: 'function': incompatible types - from 'edict_t *' to 'vec_t *'
-C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\game\p_weapon.c(816,83): warning C4100: 'effect': unreferenced formal parameter
+  Generating Code...
      Creating library .\..\release\gamex86.lib and object .\..\release\gamex86.exp
   game.vcxproj -> C:\Users\bgale\Documents\Git\Game-Mod-Q2-F23\release\gamex86.dll
