@@ -420,7 +420,7 @@ void TossClientWeapon (edict_t *self)
 	item = self->client->pers.weapon;
 	if (! self->client->pers.inventory[self->client->ammo_index] )
 		item = NULL;
-	if (item && (strcmp (item->pickup_name, "Pistol") == 0))
+	if (item && (strcmp (item->pickup_name, "10mm Pistol") == 0))
 		item = NULL;
 
 	if (!((int)(dmflags->value) & DF_QUAD_DROP))
@@ -610,21 +610,50 @@ void InitClientPersistant (gclient_t *client)
 
 	memset (&client->pers, 0, sizeof(client->pers));
 
-	item = FindItem("Pistol");
+	/* Add Pistol */
+	item = FindItem("10mm Pistol");
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[client->pers.selected_item] = 1;
 
 	client->pers.weapon = item;
 
-	client->pers.health			= 100;
-	client->pers.max_health		= 100;
+	/* Add Ammo */
+	item = FindItem("Bullets");
+	client->pers.inventory[ ITEM_INDEX(item) ] += 50;
 
-	client->pers.max_bullets	= 200;
-	client->pers.max_shells		= 100;
-	client->pers.max_rockets	= 50;
-	client->pers.max_grenades	= 50;
-	client->pers.max_cells		= 200;
-	client->pers.max_slugs		= 50;
+	/* Initiliazing Level System */
+	client->pers.lvl = 1;
+	client->pers.exp = 0;
+	client->pers.next_lvl = 1000;
+
+	//Setting Special Stats;
+	client->pers.str = 5;
+	client->pers.per = 5;
+	client->pers.end = 10;
+	client->pers.intel = 10;
+	client->pers.agl = 10;
+	client->pers.lck = 5;
+
+
+	//Setting Skills
+	client->pers.small_guns = 15 + (2 * client->pers.agl);
+	client->pers.big_guns = 10 + client->pers.agl;
+	client->pers.energy_wep = 10 + client->pers.agl;
+	client->pers.traps = 15 + (5 * client->pers.per);
+	client->pers.lock_pick = 10 + (2.5 * client->pers.per) + (2.5 * client->pers.intel);
+	client->pers.first_aid = 10 + (5 * client->pers.intel);
+	client->pers.outdoorsman = 10 + (5 * client->pers.per);
+
+	//Setting Gameplay Stats
+	client->pers.max_health		= 50 + (10 * client->pers.end);
+	client->pers.health			= client->pers.max_health;
+
+	client->pers.max_bullets	= 100 + (20 * client->pers.str);
+	client->pers.max_shells		= 50 + (10 * client->pers.str);
+	client->pers.max_rockets	= 20 + (6 * client->pers.str);
+	client->pers.max_grenades	= 20 + (6 * client->pers.str);;
+	client->pers.max_cells		= 100 + (20 * client->pers.str);
+	client->pers.max_slugs		= 20 + (6 * client->pers.str);
 
 	client->pers.connected = true;
 }
@@ -1625,6 +1654,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 
 		pm.cmd = *ucmd;
+
+		pm.agl = client->pers.agl;
 
 		pm.trace = PM_trace;	// adds default parms
 		pm.pointcontents = gi.pointcontents;

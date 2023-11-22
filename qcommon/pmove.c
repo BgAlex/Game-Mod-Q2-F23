@@ -59,6 +59,29 @@ float	pm_wateraccelerate = 10;
 float	pm_friction = 6;
 float	pm_waterfriction = 1;
 float	pm_waterspeed = 400;
+float	pm_jumpspeed = 270;
+
+
+/*
+==================
+UpdateSpeedStats
+
+Updates the player speed stats to reflect the agility stat
+==================
+*/
+void UpdateSpeedStats(int agility)
+{
+	pm_stopspeed = 100;
+	pm_maxspeed = 100 + (agility * 40);
+	pm_duckspeed = 50 + (agility * 10);
+	//pm_accelerate = 10;
+	//pm_airaccelerate = 0;
+	//pm_wateraccelerate = 10;
+	pm_waterspeed = 200 + (agility * 40);
+	pm_jumpspeed = 200 + (agility * 14);
+}
+
+
 
 /*
 
@@ -817,9 +840,9 @@ void PM_CheckJump (void)
 	pm->s.pm_flags |= PMF_JUMP_HELD;
 
 	pm->groundentity = NULL;
-	pml.velocity[2] += 270;
-	if (pml.velocity[2] < 270)
-		pml.velocity[2] = 270;
+	pml.velocity[2] += pm_jumpspeed;
+	if (pml.velocity[2] < pm_jumpspeed)
+		pml.velocity[2] = pm_jumpspeed;
 }
 
 
@@ -1240,6 +1263,8 @@ Can be called by either the server or the client
 void Pmove (pmove_t *pmove)
 {
 	pm = pmove;
+
+	UpdateSpeedStats( pm->agl );
 
 	// clear results
 	pm->numtouch = 0;

@@ -862,6 +862,29 @@ typedef struct
 	int			helpchanged;
 
 	qboolean	spectator;			// client is a spectator
+
+	//S.P.E.C.I.A.L. stats
+	int str;
+	int per;
+	int end;
+	int intel;
+	int agl;
+	int lck;
+
+	//Leveling Skills
+	int small_guns;
+	int big_guns;
+	int energy_wep;
+	int traps;
+	int first_aid;
+	int outdoorsman;
+	int lock_pick;
+
+	//Level:
+	int lvl;
+	int exp;
+	int next_lvl;
+
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns

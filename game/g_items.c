@@ -502,7 +502,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 
 	if (weapon && !oldcount)
 	{
-		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("pistol") ) )
+		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("10mm pistol") ) )
 			other->client->newweapon = ent->item;
 	}
 
@@ -560,7 +560,7 @@ qboolean Pickup_Health (edict_t *ent, edict_t *other)
 		if (other->health >= other->max_health)
 			return false;
 
-	other->health += ent->count;
+	other->health += ( ent->count * (other->client->pers.first_aid /50.0) );
 
 	if (!(ent->style & HEALTH_IGNORE_MAX))
 	{
@@ -1323,7 +1323,7 @@ always owned, never in the world
 		NULL, 0,
 		"models/weapons/v_blast/tris.md2",
 /* icon */		"w_blaster",
-/* pickup */	"Pistol",
+/* pickup */	"10mm Pistol",
 		0,
 		0,
 		"Bullets",

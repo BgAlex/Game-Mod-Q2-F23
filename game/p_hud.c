@@ -303,6 +303,9 @@ void HelpComputer (edict_t *ent)
 {
 	char	string[1024];
 	char	*sk;
+	char	p_stats[128];
+	char	p_skills[256];
+
 
 	if (skill->value == 0)
 		sk = "easy";
@@ -313,19 +316,33 @@ void HelpComputer (edict_t *ent)
 	else
 		sk = "hard+";
 
+	/* Player Stats */
+	sprintf(p_stats, "LVL: %i   EXP: %i/%i\nST: %i    IN: %i\nPE: %i    AG: %i\nEN: %i    LK: %i",
+			ent->client->pers.lvl, ent->client->pers.exp, ent->client->pers.next_lvl,
+			ent->client->pers.str, ent->client->pers.intel,
+			ent->client->pers.per, ent->client->pers.agl,
+			ent->client->pers.end, ent->client->pers.lck );
+
+	/* Player Skills */
+	sprintf(p_skills, "Small Guns: %i Big Guns: %i\nEnrgy Weps: %i Traps: %i\nFirst Aid: %i Lockpick: %i\nOutdoorsman: %i",
+			ent->client->pers.small_guns, ent->client->pers.big_guns,
+			ent->client->pers.energy_wep, ent->client->pers.traps,
+			ent->client->pers.first_aid, ent->client->pers.lock_pick,
+			ent->client->pers.outdoorsman );
+
 	// send the layout
-	Com_sprintf (string, sizeof(string),
+	Com_sprintf(string, sizeof(string),
 		"xv 32 yv 8 picn help "			// background
 		"xv 202 yv 12 string2 \"%s\" "		// skill
 		"xv 0 yv 24 cstring2 \"%s\" "		// level name
 		"xv 0 yv 54 cstring2 \"%s\" "		// help 1
 		"xv 0 yv 110 cstring2 \"%s\" "		// help 2
 		"xv 50 yv 164 string2 \" kills     goals    secrets\" "
-		"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ", 
+		"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ",
 		sk,
 		level.level_name,
-		game.helpmessage1,
-		game.helpmessage2,
+		p_stats,
+		p_skills,
 		level.killed_monsters, level.total_monsters, 
 		level.found_goals, level.total_goals,
 		level.found_secrets, level.total_secrets);
