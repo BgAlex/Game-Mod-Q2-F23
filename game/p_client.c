@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
+void ClientBegin(edict_t* ent);
+
 void SP_misc_teleporter_dest (edict_t *ent);
 
 //
@@ -594,7 +596,54 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	gi.linkentity (self);
 }
 
+
+
+
 //=======================================================================
+
+
+void UpdateSkills(gclient_t* client)
+{
+	//Setting Skills
+	client->pers.small_guns = 15 + (2 * client->pers.agl);
+	client->pers.big_guns = 10 + client->pers.agl;
+	client->pers.energy_wep = 10 + client->pers.agl;
+	client->pers.traps = 15 + (5 * client->pers.per);
+	client->pers.lock_pick = 10 + (2.5 * client->pers.per) + (2.5 * client->pers.intel);
+	client->pers.first_aid = 10 + (5 * client->pers.intel);
+	client->pers.outdoorsman = 10 + (5 * client->pers.per);
+
+	//Setting Gameplay Stats
+	client->pers.max_health = 50 + (10 * client->pers.end);
+	client->pers.health = client->pers.max_health;
+
+	client->pers.max_bullets = 100 + (20 * client->pers.str);
+	client->pers.max_shells = 50 + (10 * client->pers.str);
+	client->pers.max_rockets = 20 + (6 * client->pers.str);
+	client->pers.max_grenades = 20 + (6 * client->pers.str);;
+	client->pers.max_cells = 100 + (20 * client->pers.str);
+	client->pers.max_slugs = 20 + (6 * client->pers.str);
+}
+
+
+/*
+===============
+UpdatePlayerSkills
+
+Updates the player's skills to reflect their SPECIAL stats.
+===============
+*/
+void UpdatePlayerSkills(edict_t* ent)
+{
+	UpdateSkills(ent->client);
+
+	ent->max_health = ent->client->pers.max_health;
+	ent->health = ent->client->pers.max_health;
+
+	//SaveClientData();
+	//ClientBegin(ent);
+	//FetchClientEntData(ent);
+}
 
 /*
 ==============
@@ -622,40 +671,26 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.inventory[ ITEM_INDEX(item) ] += 50;
 
 	/* Initiliazing Level System */
-	client->pers.lvl = 1;
+	client->pers.lvl = 0;
 	client->pers.exp = 0;
-	client->pers.next_lvl = 1000;
+	client->pers.next_lvl = 0;
 
 	//Setting Special Stats;
-	client->pers.str = 5;
-	client->pers.per = 5;
+	client->pers.str = 1;
+	client->pers.per = 1;
 	client->pers.end = 10;
-	client->pers.intel = 10;
-	client->pers.agl = 10;
-	client->pers.lck = 5;
+	client->pers.intel = 1;
+	client->pers.agl = 1;
+	client->pers.lck = 1;
 
+	client->pers.sp = 35;
 
-	//Setting Skills
-	client->pers.small_guns = 15 + (2 * client->pers.agl);
-	client->pers.big_guns = 10 + client->pers.agl;
-	client->pers.energy_wep = 10 + client->pers.agl;
-	client->pers.traps = 15 + (5 * client->pers.per);
-	client->pers.lock_pick = 10 + (2.5 * client->pers.per) + (2.5 * client->pers.intel);
-	client->pers.first_aid = 10 + (5 * client->pers.intel);
-	client->pers.outdoorsman = 10 + (5 * client->pers.per);
+	UpdateSkills(client);
 
-	//Setting Gameplay Stats
-	client->pers.max_health		= 50 + (10 * client->pers.end);
-	client->pers.health			= client->pers.max_health;
-
-	client->pers.max_bullets	= 100 + (20 * client->pers.str);
-	client->pers.max_shells		= 50 + (10 * client->pers.str);
-	client->pers.max_rockets	= 20 + (6 * client->pers.str);
-	client->pers.max_grenades	= 20 + (6 * client->pers.str);;
-	client->pers.max_cells		= 100 + (20 * client->pers.str);
-	client->pers.max_slugs		= 20 + (6 * client->pers.str);
+	client->pers.stats_finished = false;
 
 	client->pers.connected = true;
+
 }
 
 
@@ -1600,7 +1635,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 {
 	gclient_t	*client;
 	edict_t	*other;
-	int		i, j;
+	int		i, j, agl;
 	pmove_t	pm;
 
 	level.current_entity = ent;
@@ -1658,6 +1693,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		pm.trace = PM_trace;	// adds default parms
 		pm.pointcontents = gi.pointcontents;
+
+		agl = client->pers.stats_finished ? client->pers.agl : 0;
+		pm.agl = agl;
 
 		// perform a pmove
 		gi.Pmove (&pm);

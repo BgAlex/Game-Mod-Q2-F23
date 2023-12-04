@@ -871,9 +871,12 @@ void Pistol_Fire(edict_t* ent, vec3_t g_offset, int damage)
 	vec3_t	forward, right;
 	vec3_t	start;
 	vec3_t	offset;
-	int		kick;
+	int		kick, hspread, vspread;
 
 	kick = 2;
+
+	hspread = DEFAULT_BULLET_HSPREAD - ((ent->client->pers.per * 80) + (ent->client->pers.small_guns * 4));
+	vspread = DEFAULT_BULLET_VSPREAD - ((ent->client->pers.per * 140) + (ent->client->pers.small_guns * 6));
 
 	if (ent->client->pers.inventory[ent->client->ammo_index] < 1)
 	{
@@ -900,7 +903,7 @@ void Pistol_Fire(edict_t* ent, vec3_t g_offset, int damage)
 	VectorScale(forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+	fire_bullet(ent, start, forward, damage, kick, hspread, vspread, MOD_MACHINEGUN);
 
 	if (!((int)dmflags->value & DF_INFINITE_AMMO))
 		ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1033,6 +1036,10 @@ void Machinegun_Fire (edict_t *ent)
 	int			damage = 8;
 	int			kick = 2;
 	vec3_t		offset;
+	int			hspread, vspread;
+
+	hspread = DEFAULT_BULLET_HSPREAD - ((ent->client->pers.per * 80) + (ent->client->pers.small_guns * 4));
+	vspread = DEFAULT_BULLET_VSPREAD - ((ent->client->pers.per * 140) + (ent->client->pers.small_guns * 6));
 
 	if (!(ent->client->buttons & BUTTON_ATTACK))
 	{
@@ -1055,6 +1062,20 @@ void Machinegun_Fire (edict_t *ent)
 			ent->pain_debounce_time = level.time + 1;
 		}
 		NoAmmoWeaponChange (ent);
+		return;
+	}
+
+	/* Critical Failure */
+	if ( (random() * 100) <= (11 - ent->client->pers.lck) )
+	{
+		gi.bprintf(PRINT_HIGH, "You critically missed and your weapon jammed.\n");
+		ent->client->ps.gunframe = 6;
+		if (level.time >= ent->pain_debounce_time)
+		{
+			gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+			ent->pain_debounce_time = level.time + 1;
+		}
+		NoAmmoWeaponChange(ent);
 		return;
 	}
 
@@ -1085,7 +1106,7 @@ void Machinegun_Fire (edict_t *ent)
 	AngleVectors (angles, forward, right, NULL);
 	VectorSet(offset, 0, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+	fire_bullet (ent, start, forward, damage, kick, hspread, vspread, MOD_MACHINEGUN);
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1126,8 +1147,11 @@ void Chaingun_Fire (edict_t *ent)
 	vec3_t		forward, right, up;
 	float		r, u;
 	vec3_t		offset;
-	int			damage;
+	int			damage, hspread, vspread;
 	int			kick = 2;
+
+	hspread = DEFAULT_BULLET_HSPREAD - ((ent->client->pers.per * 80) + (ent->client->pers.small_guns * 4));
+	vspread = DEFAULT_BULLET_VSPREAD - ((ent->client->pers.per * 140) + (ent->client->pers.small_guns * 6));
 
 	if (deathmatch->value)
 		damage = 6;
@@ -1223,7 +1247,7 @@ void Chaingun_Fire (edict_t *ent)
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 		//fire_blaster(ent, start, forward, damage, 1000, EF_HYPERBLASTER, true);
-		fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
+		fire_bullet (ent, start, forward, damage, kick, hspread, vspread, MOD_CHAINGUN);
 	}
 
 	// send muzzle flash

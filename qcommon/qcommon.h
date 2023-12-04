@@ -684,6 +684,8 @@ extern float pm_airaccelerate;
 
 void Pmove (pmove_t *pmove);
 
+//void UpdateSpeedStats(int agl);
+
 /*
 ==============================================================
 

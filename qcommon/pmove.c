@@ -71,6 +71,16 @@ Updates the player speed stats to reflect the agility stat
 */
 void UpdateSpeedStats(int agility)
 {
+	if (agility == 0)
+	{
+		pm_stopspeed = 0;
+		pm_maxspeed = 0;
+		pm_duckspeed = 0;
+		pm_waterspeed = 0;
+		pm_jumpspeed = 0;
+
+		return;
+	}
 	pm_stopspeed = 100;
 	pm_maxspeed = 100 + (agility * 40);
 	pm_duckspeed = 50 + (agility * 10);

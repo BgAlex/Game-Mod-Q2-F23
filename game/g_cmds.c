@@ -900,6 +900,93 @@ void Cmd_PlayerList_f(edict_t *ent)
 }
 
 
+qboolean isnum(char* s)
+{
+	if (*s == '\0')
+		return false;
+
+	while (*s != '\0')
+	{
+		if ( !isdigit(*s) )
+			return false;
+		s++;
+	}
+	
+	return true;
+}
+
+int Fetch_Stat_Total(gclient_t* client)
+{
+	int stat_total;
+
+	stat_total = client->pers.str;
+	stat_total += client->pers.end;
+	stat_total += client->pers.per;
+	stat_total += client->pers.intel;
+	stat_total += client->pers.agl;
+	stat_total += client->pers.lck;
+
+	return stat_total;
+}
+
+void Cmd_Set_Special(edict_t* ent)
+{
+
+}
+
+void Cmd_Finish_Special(edict_t* ent)
+{
+	ent->client->pers.stats_finished = true;
+
+	ent->client->pers.lvl = 1;
+	ent->client->pers.next_lvl = 1000;
+	ent->client->pers.sp = 0;
+
+	UpdatePlayerSkills(ent);
+
+	gi.cprintf(ent, PRINT_HIGH, "SPECIAL stats have been assigned.\nYou may now begin playing.\n");
+}
+
+void Cmd_Set_Stat(edict_t* ent, int *stat, char *stat_name)
+{
+	int old, new;
+	char* name;
+
+	if (ent->client->pers.stats_finished)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "SPECIAL stats have already been assigned.\n");
+		return;
+	}
+
+	name = gi.args();
+
+	if ( !isnum(name) )
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Invalid argument provided: '%s'\n", name);
+		return;
+	}
+
+	new = atoi(name);
+
+	if( new > 10 || new < 1 )
+	{
+		gi.cprintf(ent, PRINT_HIGH, "SPECIAL stats can be no less than 10 and no greater than 1.\n");
+		return;
+	}
+
+	old = *stat;
+	*stat = new;
+
+	if (Fetch_Stat_Total(ent->client) > ent->client->pers.sp)
+	{
+		*stat = old;
+		gi.cprintf(ent, PRINT_HIGH, "Not enough SPECIAL points to set the stat to %d.\nYou have %d SPECIAL points remaining.\n", new, ent->client->pers.sp - Fetch_Stat_Total(ent->client) );
+		return;
+	}
+
+	gi.cprintf(ent, PRINT_HIGH, "%s has been set to %d.\n", stat_name, new);
+}
+
 /*
 =================
 ClientCommand
@@ -987,6 +1074,20 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+	else if (Q_stricmp(cmd, "finish_special") == 0)
+		Cmd_Finish_Special(ent);
+	else if (Q_stricmp(cmd, "set_str") == 0)
+		Cmd_Set_Stat(ent, &(ent->client->pers.str), "Strength");
+	else if (Q_stricmp(cmd, "set_per") == 0)
+		Cmd_Set_Stat(ent, &(ent->client->pers.per), "Perception");
+	else if (Q_stricmp(cmd, "set_end") == 0)
+		Cmd_Set_Stat(ent, &(ent->client->pers.end), "Endurance");
+	else if (Q_stricmp(cmd, "set_int") == 0)
+		Cmd_Set_Stat(ent, &(ent->client->pers.intel), "Intelligence");
+	else if (Q_stricmp(cmd, "set_agl") == 0)
+		Cmd_Set_Stat(ent, &(ent->client->pers.agl), "Agility");
+	else if (Q_stricmp(cmd, "set_lck") == 0)
+		Cmd_Set_Stat(ent, &(ent->client->pers.lck), "Luck");
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

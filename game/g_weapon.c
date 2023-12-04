@@ -222,6 +222,21 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 		{
 			if (tr.ent->takedamage)
 			{
+				/* Critical Hits */
+				if ( self->client != NULL && (random() * 100) <= self->client->pers.lck )
+				{
+					damage *= 4;
+					gi.bprintf(PRINT_HIGH, "Target was critically hit for %d damage.\n", damage);
+				}
+				else if (tr.ent->client != NULL && (random() * 100) <= (11 - tr.ent->client->pers.lck ) )
+				{
+					damage *= 4;
+					if (skill->value == 0 && deathmatch->value == 0)
+						gi.bprintf(PRINT_HIGH, "You were critically hit for %d damage.\n", damage / 2 );
+					else
+						gi.bprintf(PRINT_HIGH, "You were critically hit for %d damage.\n", damage);
+				}
+		
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
 			}
 			else
