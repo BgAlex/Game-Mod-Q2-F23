@@ -931,7 +931,64 @@ int Fetch_Stat_Total(gclient_t* client)
 
 void Cmd_Set_Special(edict_t* ent)
 {
+	char* name;
+	int stats[6], i, sum;
+	char* stat_names[] = { "Strength", "Perception", "Endurance", "Intelligence", "Agility", "Luck" };
 
+	if (gi.argc() != 7)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "This command demands 6 numerical parameters.\n");
+		return;
+	}
+
+	if (ent->client->pers.stats_finished)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "SPECIAL stats have already been assigned.\n");
+		return;
+	}
+
+	sum = 0;
+
+	for (i = 0; i < 6; i++)
+	{
+		name = gi.argv(i+1);
+
+		if (!isnum(name))
+		{
+			gi.cprintf(ent, PRINT_HIGH, "Invalid argument %d provided: '%s'\n", i, name);
+			return;
+		}
+
+		stats[i] = atoi(name);
+
+		if (stats[i] > 10 || stats[i] < 1)
+		{
+			gi.cprintf(ent, PRINT_HIGH, "SPECIAL stats can be no less than 10 and no greater than 1.\n");
+			return;
+		}
+
+		sum += stats[i];
+	}
+	
+	if(sum > ent->client->pers.sp)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Not enough SPECIAL points for this allocation.\nYou are %d SPECIAL points over budget.\n", sum - ent->client->pers.sp);
+		return;
+	}
+	
+	ent->client->pers.str = stats[0];
+	ent->client->pers.per = stats[1];
+	ent->client->pers.end = stats[2];
+	ent->client->pers.intel = stats[3];
+	ent->client->pers.agl = stats[4];
+	ent->client->pers.lck = stats[5];
+
+	for (i = 0; i < 6; i++)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "%s has been set to %d.\n", stat_names[i], stats[i]);
+	}
+
+	gi.cprintf(ent, PRINT_HIGH, "You have %d SPECIAL points remaining.\n", ent->client->pers.sp - sum);
 }
 
 void Cmd_Finish_Special(edict_t* ent)
@@ -949,9 +1006,10 @@ void Cmd_Finish_Special(edict_t* ent)
 
 void Cmd_Set_Stat(edict_t* ent, int *stat, char *stat_name)
 {
-	int old, new;
+	int old, new, sum;
 	char* name;
 
+	//Check if stats already assigned.
 	if (ent->client->pers.stats_finished)
 	{
 		gi.cprintf(ent, PRINT_HIGH, "SPECIAL stats have already been assigned.\n");
@@ -960,6 +1018,7 @@ void Cmd_Set_Stat(edict_t* ent, int *stat, char *stat_name)
 
 	name = gi.args();
 
+	//Check if numerical.
 	if ( !isnum(name) )
 	{
 		gi.cprintf(ent, PRINT_HIGH, "Invalid argument provided: '%s'\n", name);
@@ -976,15 +1035,18 @@ void Cmd_Set_Stat(edict_t* ent, int *stat, char *stat_name)
 
 	old = *stat;
 	*stat = new;
+	sum = (Fetch_Stat_Total(ent->client));
 
-	if (Fetch_Stat_Total(ent->client) > ent->client->pers.sp)
+	//Check if more stats needed than assigned.
+	if( sum > ent->client->pers.sp)
 	{
 		*stat = old;
-		gi.cprintf(ent, PRINT_HIGH, "Not enough SPECIAL points to set the stat to %d.\nYou have %d SPECIAL points remaining.\n", new, ent->client->pers.sp - Fetch_Stat_Total(ent->client) );
+		gi.cprintf(ent, PRINT_HIGH, "Not enough SPECIAL points to set the stat to %d.\nYou have %d SPECIAL points remaining.\n", new, ent->client->pers.sp - sum );
 		return;
 	}
 
 	gi.cprintf(ent, PRINT_HIGH, "%s has been set to %d.\n", stat_name, new);
+	gi.cprintf(ent, PRINT_HIGH, "You have %d SPECIAL points remaining.\n", ent->client->pers.sp - sum);
 }
 
 /*
@@ -1074,6 +1136,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+	else if (Q_stricmp(cmd, "set_special") == 0)
+		Cmd_Set_Special(ent);
 	else if (Q_stricmp(cmd, "finish_special") == 0)
 		Cmd_Finish_Special(ent);
 	else if (Q_stricmp(cmd, "set_str") == 0)

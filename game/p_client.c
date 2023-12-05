@@ -678,7 +678,7 @@ void InitClientPersistant (gclient_t *client)
 	//Setting Special Stats;
 	client->pers.str = 1;
 	client->pers.per = 1;
-	client->pers.end = 10;
+	client->pers.end = 1;
 	client->pers.intel = 1;
 	client->pers.agl = 1;
 	client->pers.lck = 1;
