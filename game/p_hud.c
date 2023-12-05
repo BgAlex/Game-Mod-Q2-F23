@@ -303,7 +303,7 @@ void HelpComputer (edict_t *ent)
 {
 	char	string[1024];
 	char	*sk;
-	char	p_stats[128];
+	char	p_stats[256];
 	char	p_skills[256];
 
 
@@ -316,19 +316,31 @@ void HelpComputer (edict_t *ent)
 	else
 		sk = "hard+";
 
-	/* Player Stats */
-	sprintf(p_stats, "LVL: %i   EXP: %i/%i\nST: %i    IN: %i\nPE: %i    AG: %i\nEN: %i    LK: %i",
+	/* For when players have SPECIAL stats set. */
+	if (ent->client->pers.stats_finished)
+	{
+		sprintf(p_stats, "LVL: %i   EXP: %i/%i\nST: %i    IN: %i\nPE: %i    AG: %i\nEN: %i    LK: %i",
 			ent->client->pers.lvl, ent->client->pers.exp, ent->client->pers.next_lvl,
 			ent->client->pers.str, ent->client->pers.intel,
 			ent->client->pers.per, ent->client->pers.agl,
-			ent->client->pers.end, ent->client->pers.lck );
+			ent->client->pers.end, ent->client->pers.lck);
 
-	/* Player Skills */
-	sprintf(p_skills, "Small Guns: %i Big Guns: %i\nEnrgy Weps: %i Traps: %i\nFirst Aid: %i Lockpick: %i\nOutdoorsman: %i",
+		/* Player Skills */
+		sprintf(p_skills, "Small Guns: %i Big Guns: %i\nEnrgy Weps: %i Traps: %i\nFirst Aid: %i Lockpick: %i\nOutdoorsman: %i",
 			ent->client->pers.small_guns, ent->client->pers.big_guns,
 			ent->client->pers.energy_wep, ent->client->pers.traps,
 			ent->client->pers.first_aid, ent->client->pers.lock_pick,
-			ent->client->pers.outdoorsman );
+			ent->client->pers.outdoorsman);
+	}
+	else
+	{
+		sprintf(p_skills, "Mom.");
+		
+		sprintf(p_stats, "Welcome to Alex's Mod!\nTo learn about this mod,\nrun help in console\nor consult README.");
+		sprintf(p_skills, "SPECIAL not assigned.\nRun command begin_special\nto assign SPECIAL stats.\nCheck stats later with F1.");
+	}
+
+	
 
 	// send the layout
 	Com_sprintf(string, sizeof(string),

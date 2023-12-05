@@ -259,15 +259,15 @@ void NoAmmoWeaponChange (edict_t *ent)
 		return;
 	}
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("shells"))] > 1
-		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem("super shotgun"))] )
+		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem("Widowmaker"))] )
 	{
-		ent->client->newweapon = FindItem ("super shotgun");
+		ent->client->newweapon = FindItem ("Widowmaker");
 		return;
 	}
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("shells"))]
-		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem("shotgun"))] )
+		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem("Jackhammer"))] )
 	{
-		ent->client->newweapon = FindItem ("shotgun");
+		ent->client->newweapon = FindItem ("Jackhammer");
 		return;
 	}
 	ent->client->newweapon = FindItem ("10mm pistol");
@@ -1291,9 +1291,38 @@ void weapon_shotgun_fire (edict_t *ent)
 	int			damage = 4;
 	int			kick = 8;
 
+	
+	/*
 	if (ent->client->ps.gunframe == 9)
 	{
 		ent->client->ps.gunframe++;
+		return;
+	}
+	*/
+
+	if (!(ent->client->buttons & BUTTON_ATTACK) || ent->client->machinegun_shots > 5)
+	{
+		ent->client->machinegun_shots = 0;
+		ent->client->ps.gunframe++;
+		return;
+	}
+
+	if (ent->client->ps.gunframe == 9)
+		ent->client->ps.gunframe = 8;
+	else
+		ent->client->ps.gunframe = 9;
+
+	/* Interrupt automatic fire if out of ammo */
+	if (ent->client->pers.inventory[ent->client->ammo_index] < 1)
+	{
+		ent->client->ps.gunframe = 10;
+		ent->client->machinegun_shots = 0;
+		if (level.time >= ent->pain_debounce_time)
+		{
+			gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+			ent->pain_debounce_time = level.time + 1;
+		}
+		NoAmmoWeaponChange(ent);
 		return;
 	}
 
@@ -1322,7 +1351,8 @@ void weapon_shotgun_fire (edict_t *ent)
 	gi.WriteByte (MZ_SHOTGUN | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-	ent->client->ps.gunframe++;
+	ent->client->machinegun_shots++;
+
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )

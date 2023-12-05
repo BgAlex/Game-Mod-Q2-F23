@@ -82,7 +82,7 @@ void UpdateSpeedStats(int agility)
 		return;
 	}
 	pm_stopspeed = 100;
-	pm_maxspeed = 100 + (agility * 40);
+	pm_maxspeed = 200 + (agility * 20);
 	pm_duckspeed = 50 + (agility * 10);
 	//pm_accelerate = 10;
 	//pm_airaccelerate = 0;

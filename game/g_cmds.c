@@ -1049,6 +1049,48 @@ void Cmd_Set_Stat(edict_t* ent, int *stat, char *stat_name)
 	gi.cprintf(ent, PRINT_HIGH, "You have %d SPECIAL points remaining.\n", ent->client->pers.sp - sum);
 }
 
+void Cmd_Max_Stone(edict_t* ent)
+{
+	ent->client->pers.str = 8;
+	ent->client->pers.per = 4;
+	ent->client->pers.end = 9;
+	ent->client->pers.intel = 3;
+	ent->client->pers.agl = 7;
+	ent->client->pers.lck = 4;
+
+	gi.cprintf(ent, PRINT_HIGH, "You are Max Stone.\n");
+
+	Cmd_Finish_Special(ent);
+}
+
+void Cmd_Albert_Cole(edict_t* ent)
+{
+	ent->client->pers.str = 5;
+	ent->client->pers.per = 8;
+	ent->client->pers.end = 4;
+	ent->client->pers.intel = 6;
+	ent->client->pers.agl = 4;
+	ent->client->pers.lck = 8;
+
+	gi.cprintf(ent, PRINT_HIGH, "You are Albert Cole.\n");
+
+	Cmd_Finish_Special(ent);
+}
+
+void Cmd_Natalia(edict_t* ent)
+{
+	ent->client->pers.str = 3;
+	ent->client->pers.per = 5;
+	ent->client->pers.end = 5;
+	ent->client->pers.intel = 7;
+	ent->client->pers.agl = 9;
+	ent->client->pers.lck = 6;
+
+	gi.cprintf(ent, PRINT_HIGH, "You are Natalia Dubrovhsky.\n");
+
+	Cmd_Finish_Special(ent);
+}
+
 /*
 =================
 ClientCommand
@@ -1136,6 +1178,12 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+	else if (Q_stricmp(cmd, "max_stone") == 0)
+		Cmd_Max_Stone(ent);
+	else if (Q_stricmp(cmd, "albert_cole") == 0)
+		Cmd_Albert_Cole(ent);
+	else if (Q_stricmp(cmd, "natalia") == 0)
+		Cmd_Natalia(ent);
 	else if (Q_stricmp(cmd, "set_special") == 0)
 		Cmd_Set_Special(ent);
 	else if (Q_stricmp(cmd, "finish_special") == 0)
