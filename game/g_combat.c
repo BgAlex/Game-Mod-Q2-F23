@@ -93,11 +93,27 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 {
 	if (targ->health < -999)
 		targ->health = -999;
+	
+	/* Bloody Mess */
+	if (inflictor->client && inflictor->client->pers.bloody_mess)
+	{
+		targ->health = -999;
+	}
 
 	targ->enemy = attacker;
 
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
+		/* EXP */
+		if (inflictor->client)
+		{
+			gi.bprintf(PRINT_HIGH, "For defeating your foes, you gain 100 EXP.\n");
+			inflictor->client->pers.exp += 100;
+
+			if (inflictor->client->pers.exp >= inflictor->client->pers.next_lvl)
+				Cmd_Level_Up(inflictor);
+		}
+
 //		targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
 		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY))
 		{
@@ -493,6 +509,9 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
 
 		targ->health = targ->health - take;
+
+		/* Bloody Mess */
+
 			
 		if (targ->health <= 0)
 		{

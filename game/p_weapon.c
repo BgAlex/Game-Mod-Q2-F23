@@ -253,9 +253,9 @@ void NoAmmoWeaponChange (edict_t *ent)
 		return;
 	}
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("bullets"))]
-		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem("machinegun"))] )
+		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem("10mm SMG"))] )
 	{
-		ent->client->newweapon = FindItem ("machinegun");
+		ent->client->newweapon = FindItem ("10mm SMG");
 		return;
 	}
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("shells"))] > 1
@@ -1039,22 +1039,27 @@ void Machinegun_Fire (edict_t *ent)
 	int			damage = 8;
 	int			kick = 2;
 	vec3_t		offset;
-	int			hspread, vspread;
+	int			hspread, vspread, shots;
 
 	hspread = DEFAULT_BULLET_HSPREAD - ((ent->client->pers.per * 80) + (ent->client->pers.small_guns * 4));
 	vspread = DEFAULT_BULLET_VSPREAD - ((ent->client->pers.per * 140) + (ent->client->pers.small_guns * 6));
 
-	if (!(ent->client->buttons & BUTTON_ATTACK))
+	if (!(ent->client->buttons & BUTTON_ATTACK) || ent->client->machinegun_shots > 8)
 	{
 		ent->client->machinegun_shots = 0;
-		ent->client->ps.gunframe++;
+		//ent->client->ps.gunframe++;
+		ent->client->ps.gunframe = 6;
+		ent->pain_debounce_time = level.time + 1;
+		ent->client->newweapon = FindItem("10mm SMG");
 		return;
 	}
 
 	if (ent->client->ps.gunframe == 5)
 		ent->client->ps.gunframe = 4;
+	/*
 	else
 		ent->client->ps.gunframe = 5;
+	*/
 
 	if (ent->client->pers.inventory[ent->client->ammo_index] < 1)
 	{
@@ -1069,16 +1074,11 @@ void Machinegun_Fire (edict_t *ent)
 	}
 
 	/* Critical Failure */
-	if ( (random() * 100) <= (11 - ent->client->pers.lck) )
+	if ( (random() * 1000) <= (40 - (ent->client->pers.lck * 4) ) )
 	{
 		gi.bprintf(PRINT_HIGH, "You critically missed and your weapon jammed.\n");
-		ent->client->ps.gunframe = 6;
-		if (level.time >= ent->pain_debounce_time)
-		{
-			gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-			ent->pain_debounce_time = level.time + 1;
-		}
-		NoAmmoWeaponChange(ent);
+		ent->pain_debounce_time = level.time + 1;
+		ent->client->newweapon = FindItem("10mm SMG");
 		return;
 	}
 
@@ -1088,28 +1088,42 @@ void Machinegun_Fire (edict_t *ent)
 		kick *= 4;
 	}
 
+	shots = ent->client->machinegun_shots > 9 ? 9 : ent->client->machinegun_shots;
+
 	for (i=1 ; i<3 ; i++)
 	{
 		ent->client->kick_origin[i] = crandom() * 0.35;
 		ent->client->kick_angles[i] = crandom() * 0.7;
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
-	ent->client->kick_angles[0] = ent->client->machinegun_shots * -1.5;
+	ent->client->kick_angles[0] = shots * -1.5;
 
+	ent->client->machinegun_shots++;
+
+	
 	// raise the gun as it is firing
+	/*
 	if (!deathmatch->value)
 	{
 		ent->client->machinegun_shots++;
 		if (ent->client->machinegun_shots > 9)
 			ent->client->machinegun_shots = 9;
 	}
+	*/
 
 	// get start / end positions
 	VectorAdd (ent->client->v_angle, ent->client->kick_angles, angles);
 	AngleVectors (angles, forward, right, NULL);
 	VectorSet(offset, 0, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bullet (ent, start, forward, damage, kick, hspread, vspread, MOD_MACHINEGUN);
+	
+	for (i = 0; i < (shots / 3 + 1); i++)
+	{
+		fire_bullet(ent, start, forward, damage, kick, hspread, vspread, MOD_MACHINEGUN);
+
+		if (!((int)dmflags->value & DF_INFINITE_AMMO))
+			ent->client->pers.inventory[ent->client->ammo_index]--;
+	}
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1118,8 +1132,6 @@ void Machinegun_Fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
 
 	ent->client->anim_priority = ANIM_ATTACK;
 	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -1290,8 +1302,11 @@ void weapon_shotgun_fire (edict_t *ent)
 	vec3_t		offset;
 	int			damage = 4;
 	int			kick = 8;
+	int			hspread, vspread;
 
-	
+	hspread = (DEFAULT_SHOTGUN_HSPREAD / 2) - ((ent->client->pers.per * 140) + (ent->client->pers.small_guns * 6));
+	vspread = DEFAULT_SHOTGUN_VSPREAD - ((ent->client->pers.per * 140) + (ent->client->pers.small_guns * 6));
+
 	/*
 	if (ent->client->ps.gunframe == 9)
 	{
@@ -1300,10 +1315,10 @@ void weapon_shotgun_fire (edict_t *ent)
 	}
 	*/
 
-	if (!(ent->client->buttons & BUTTON_ATTACK) || ent->client->machinegun_shots > 5)
+	if (!(ent->client->buttons & BUTTON_ATTACK) || ent->client->machinegun_shots >= 3)
 	{
 		ent->client->machinegun_shots = 0;
-		ent->client->ps.gunframe++;
+		ent->client->ps.gunframe = 10;
 		return;
 	}
 
@@ -1341,9 +1356,9 @@ void weapon_shotgun_fire (edict_t *ent)
 	}
 
 	if (deathmatch->value)
-		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, hspread, vspread, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
 	else
-		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, hspread, vspread, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1376,6 +1391,10 @@ void weapon_supershotgun_fire (edict_t *ent)
 	vec3_t		v;
 	int			damage = 6;
 	int			kick = 12;
+	int			hspread, vspread;
+
+	hspread = DEFAULT_SHOTGUN_HSPREAD - ((ent->client->pers.per * 260) + (ent->client->pers.small_guns * 8));
+	vspread = DEFAULT_SHOTGUN_VSPREAD - ((ent->client->pers.per * 140) + (ent->client->pers.small_guns * 6));
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1395,10 +1414,10 @@ void weapon_supershotgun_fire (edict_t *ent)
 	v[YAW]   = ent->client->v_angle[YAW] - 5;
 	v[ROLL]  = ent->client->v_angle[ROLL];
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
+	fire_shotgun (ent, start, forward, damage, kick, hspread, vspread, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
 	v[YAW]   = ent->client->v_angle[YAW] + 5;
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
+	fire_shotgun (ent, start, forward, damage, kick, hspread, vspread, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);

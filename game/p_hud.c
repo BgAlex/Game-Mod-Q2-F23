@@ -292,6 +292,126 @@ void Cmd_Score_f (edict_t *ent)
 }
 
 
+
+/*
+==================
+StatScreen
+
+Draw stat screen.
+==================
+*/
+void StatScreen(edict_t* ent)
+{
+	char	string[1024];
+	char*   sk;
+
+	char	p_perks[256];
+	char	p_skills[256];
+	char	p_level[128];
+
+	int i;
+
+
+	if (skill->value == 0)
+		sk = "easy";
+	else if (skill->value == 1)
+		sk = "medium";
+	else if (skill->value == 2)
+		sk = "hard";
+	else
+		sk = "hard+";
+
+	sprintf(p_level, "LVL: %i   EXP: %i/%i", ent->client->pers.lvl, ent->client->pers.exp, ent->client->pers.next_lvl);
+
+	/* For when players have SPECIAL stats set. */
+	if (ent->client->pers.stats_finished)
+	{
+		sprintf(p_perks, "ACTIVE PERKS:\n");
+		if (ent->client->pers.bloody_mess || ent->client->pers.aquaman || ent->client->pers.fast_shot || ent->client->pers.glass_cannon || ent->client->pers.rocket_maestro)
+		{
+			i = 0;
+			if (ent->client->pers.bloody_mess)
+			{
+				strcat(p_perks, "Bloody Mess");
+				i++;
+			}
+			if (ent->client->pers.fast_shot)
+			{
+				if( i % 2 == 1)
+					strcat(p_perks, ", ");
+				strcat(p_perks, "Fast Shot");
+				i++;
+				if (i % 2 == 0 && i > 0)
+					strcat(p_perks, ",\n");
+			}
+			if (ent->client->pers.rocket_maestro)
+			{
+				if (i % 2 == 1)
+					strcat(p_perks, ", ");
+				strcat(p_perks, "Rocket Maestro");
+				i++;
+				if( i % 2 == 0 && i > 0 )
+					strcat(p_perks, ",\n");
+			}
+			if (ent->client->pers.aquaman)
+			{
+				if (i % 2 == 1)
+					strcat(p_perks, ", ");
+				strcat(p_perks, "Aquaman");
+				i++;
+				if (i % 2 == 0 && i > 0)
+					strcat(p_perks, ",\n");
+				
+			}
+			if (ent->client->pers.glass_cannon)
+			{
+				if (i % 2 == 1)
+					strcat(p_perks, ", ");
+				strcat(p_perks, "Glass Cannon");
+				i++;
+				if (i % 2 == 0 && i > 0)
+					strcat(p_perks, ",\n");
+			}
+		}
+		else
+			strcat(p_perks, "None");
+
+		/* Player Skills */
+		sprintf(p_skills, "Sml Guns: %i   Doctor: %i\nBig Guns: %i Outdrsmn: %i\nNRG Weps: %i    Traps: %i\nSkill Points: %i",
+			ent->client->pers.small_guns, ent->client->pers.first_aid,
+			ent->client->pers.big_guns, ent->client->pers.outdoorsman,
+			ent->client->pers.energy_wep, ent->client->pers.traps,
+			ent->client->pers.sp);
+	}
+	else
+	{
+		sprintf(p_skills, "Welcome to Alex's Mod!\nAfter you set SPECIAL,\nthey are set in stone.\nConsult README for info.");
+		sprintf(p_perks, "SPECIAL not assigned.\nRun command begin_special\nto assign SPECIAL stats.\nGet help with F1.");
+	}
+
+
+
+	// send the layout
+	Com_sprintf(string, sizeof(string),
+		"xv 32 yv 8 picn help "			// background
+		"xv 202 yv 12 string2 \"%s\" "		// skill
+		"xv 0 yv 24 cstring2 \"%s\" "		// level name
+		"xv 0 yv 54 cstring2 \"%s\" "		// help 1
+		"xv 0 yv 110 cstring2 \"%s\" "		// help 2
+		"xv 50 yv 164 string2 \" ST: %i     EN: %i     PE: %i\" "
+		"xv 50 yv 172 string2 \" IN: %i     AG: %i     LK: %i\" ",
+		sk,
+		p_level,
+		p_skills,
+		p_perks,
+		ent->client->pers.str, ent->client->pers.end, ent->client->pers.per,
+		ent->client->pers.intel, ent->client->pers.agl, ent->client->pers.lck);
+
+	gi.WriteByte(svc_layout);
+	gi.WriteString(string);
+	gi.unicast(ent, true);
+}
+
 /*
 ==================
 HelpComputer
@@ -319,25 +439,13 @@ void HelpComputer (edict_t *ent)
 	/* For when players have SPECIAL stats set. */
 	if (ent->client->pers.stats_finished)
 	{
-		sprintf(p_stats, "LVL: %i   EXP: %i/%i\nST: %i    IN: %i\nPE: %i    AG: %i\nEN: %i    LK: %i",
-			ent->client->pers.lvl, ent->client->pers.exp, ent->client->pers.next_lvl,
-			ent->client->pers.str, ent->client->pers.intel,
-			ent->client->pers.per, ent->client->pers.agl,
-			ent->client->pers.end, ent->client->pers.lck);
-
-		/* Player Skills */
-		sprintf(p_skills, "Small Guns: %i Big Guns: %i\nEnrgy Weps: %i Traps: %i\nFirst Aid: %i Lockpick: %i\nOutdoorsman: %i",
-			ent->client->pers.small_guns, ent->client->pers.big_guns,
-			ent->client->pers.energy_wep, ent->client->pers.traps,
-			ent->client->pers.first_aid, ent->client->pers.lock_pick,
-			ent->client->pers.outdoorsman);
+		sprintf(p_stats, "Gun skills decides spread.\nDoctor decides heals.\nOutdoorsman decides ammo.\nTraps affects grenades.");
+		sprintf(p_skills, "Run command level_up\nto assign skill points.\nCheck stats with F2.\nGain perks every 3 levels.");
 	}
 	else
 	{
-		sprintf(p_skills, "Mom.");
-		
-		sprintf(p_stats, "Welcome to Alex's Mod!\nTo learn about this mod,\nrun help in console\nor consult README.");
-		sprintf(p_skills, "SPECIAL not assigned.\nRun command begin_special\nto assign SPECIAL stats.\nCheck stats later with F1.");
+		sprintf(p_stats, "Welcome to Alex's Mod!\nYou have levelable stats\nthat impact gameplay.\nConsult README for info.");
+		sprintf(p_skills, "SPECIAL not assigned.\nRun command begin_special\nto assign SPECIAL stats.\nCheck stats later with F2.");
 	}
 
 	
@@ -397,6 +505,34 @@ void Cmd_Help_f (edict_t *ent)
 
 
 //=======================================================================
+
+
+/*
+==================
+Cmd_Stat_f
+
+Display the current help message
+==================
+*/
+void Cmd_Stat_f(edict_t* ent)
+{
+	ent->client->showinventory = false;
+	ent->client->showscores = false;
+
+	if (ent->client->showhelp && (ent->client->pers.game_helpchanged == game.helpchanged))
+	{
+		ent->client->showhelp = false;
+		return;
+	}
+
+	ent->client->showhelp = true;
+	ent->client->pers.helpchanged = 0;
+	StatScreen(ent);
+}
+
+
+//=======================================================================
+
 
 /*
 ===============

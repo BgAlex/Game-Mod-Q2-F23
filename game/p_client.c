@@ -675,7 +675,7 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.exp = 0;
 	client->pers.next_lvl = 0;
 
-	//Setting Special Stats;
+	/* Setting Special Stats; */
 	client->pers.str = 1;
 	client->pers.per = 1;
 	client->pers.end = 1;
@@ -684,6 +684,13 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.lck = 1;
 
 	client->pers.sp = 35;
+
+	/* Setting Perks */
+	client->pers.bloody_mess = true;
+	client->pers.fast_shot = false;
+	client->pers.rocket_maestro = true;
+	client->pers.aquaman = false;
+	client->pers.glass_cannon = true;
 
 	UpdateSkills(client);
 

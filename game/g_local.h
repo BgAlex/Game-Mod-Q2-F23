@@ -601,6 +601,8 @@ extern	gitem_t	itemlist[];
 //
 void Cmd_Help_f (edict_t *ent);
 void Cmd_Score_f (edict_t *ent);
+void Cmd_Level_Up(edict_t* ent);
+void Cmd_Stat_f(edict_t* ent);
 
 //
 // g_items.c
@@ -666,8 +668,8 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 
 #define DEFAULT_BULLET_HSPREAD	1200
 #define DEFAULT_BULLET_VSPREAD	2000
-#define DEFAULT_SHOTGUN_HSPREAD	1000
-#define DEFAULT_SHOTGUN_VSPREAD	500
+#define DEFAULT_SHOTGUN_HSPREAD	4000
+#define DEFAULT_SHOTGUN_VSPREAD	2000
 #define DEFAULT_DEATHMATCH_SHOTGUN_COUNT	12
 #define DEFAULT_SHOTGUN_COUNT	12
 #define DEFAULT_SSHOTGUN_COUNT	20
@@ -885,6 +887,13 @@ typedef struct
 	int			exp;
 	int			next_lvl;
 	int			sp;
+
+	//Perks
+	qboolean	bloody_mess;
+	qboolean	fast_shot;
+	qboolean	rocket_maestro;
+	qboolean	aquaman;
+	qboolean	glass_cannon;
 
 	qboolean	stats_finished;
 
