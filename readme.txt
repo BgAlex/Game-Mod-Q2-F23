@@ -1,29 +1,27 @@
+Hello and welcome to Alex's Mod (It's Fun).
 
-This is the complete source code for Quake 2, version 3.19, buildable with
-visual C++ 6.0.  The linux version should be buildable, but we haven't
-tested it for the release.
+This mod implements Fallout 1-style character-building to Quake II.
+Players can assign SPECIAL stats to their character, level up, allocate points into different skills, and unlock unique perks.
 
-The code is all licensed under the terms of the GPL (gnu public license).  
-You should read the entire license, but the gist of it is that you can do 
-anything you want with the code, including sell your new version.  The catch 
-is that if you distribute new binary versions, you are required to make the 
-entire source code available for free to everyone.
+The game requires a custom executable that can be made from compiling the "quake ii" project in the Visual Studio solution.
 
-The primary intent of this release is for entertainment and educational 
-purposes, but the GPL does allow commercial exploitation if you obey the 
-full license.  If you want to do something commercial and you just can't bear 
-to have your source changes released, we could still negotiate a separate 
-license agreement (for $$$), but I would encourage you to just live with the 
-GPL.
+The SPECIAL stats are as follows:
+Strength - Modifies ammo carrying capacity
+Perception - Modifies accuracy on weapons
+Endurance - Modifies maximum health
+Intelligence - Modifies the amount of skill points gained upon level-up
+Agility - Modifies movement speed and jump height
+Luck - Modifies chances of critical hits and critical failures
 
-All of the Q2 data files remain copyrighted and licensed under the 
-original terms, so you cannot redistribute data from the original game, but if 
-you do a true total conversion, you can create a standalone game based on 
-this code.
+The skills are as follows:
+Small Guns - Modifies accuracy with pistols, shotguns, SMGs, etc.
+Big Guns - Modifies accuracy with chaingun, rocket launcher, etc.
+Energy Weapons - Modifies accuracy with laser pistol, laser rifle, etc.
+Traps - Modifies timers on grenades. Better traps skills results in more consistent times.
+Doctor - Modifies health gained from med kits
+Outdoorsman - Modifies ammunition gained from pickups.
 
-Thanks to Robert Duffy for doing the grunt work of building this release.
-
-John Carmack
-Id Software
-
-
+The perks are as follows:
+Bloody Mess - Enemies always gib upon death.
+Fast Shot - Fire twice as often with half the accuracy.
+Glass Cannon - Give and take 20% more damage.

@@ -107,7 +107,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 		/* EXP */
 		if (inflictor->client)
 		{
-			gi.bprintf(PRINT_HIGH, "For defeating your foes, you gain 100 EXP.\n");
+			//gi.bprintf(PRINT_HIGH, "For defeating your foes, you gain 100 EXP.\n");
 			inflictor->client->pers.exp += 100;
 
 			if (inflictor->client->pers.exp >= inflictor->client->pers.next_lvl)

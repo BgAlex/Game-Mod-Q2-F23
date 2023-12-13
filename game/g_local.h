@@ -668,6 +668,8 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 
 #define DEFAULT_BULLET_HSPREAD	1200
 #define DEFAULT_BULLET_VSPREAD	2000
+#define DEFAULT_BIGGUN_HSPREAD	1200
+#define DEFAULT_BIGGUN_VSPREAD	2000
 #define DEFAULT_SHOTGUN_HSPREAD	4000
 #define DEFAULT_SHOTGUN_VSPREAD	2000
 #define DEFAULT_DEATHMATCH_SHOTGUN_COUNT	12
@@ -730,6 +732,8 @@ qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick);
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
 void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
 void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
+void fire_flames(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
+void fire_laser(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread);
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
@@ -887,6 +891,7 @@ typedef struct
 	int			exp;
 	int			next_lvl;
 	int			sp;
+	int			perks;
 
 	//Perks
 	qboolean	bloody_mess;

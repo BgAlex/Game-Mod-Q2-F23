@@ -1117,8 +1117,78 @@ void Cmd_Level_Up(edict_t* ent)
 	ent->client->pers.lvl++;
 	ent->client->pers.next_lvl += ent->client->pers.lvl * 1000;
 	ent->client->pers.sp += 5 + (2 * ent->client->pers.intel);
+	gi.bprintf(PRINT_HIGH, "YOU HAVE LEVELED UP!\n");
 
-	gi.bprintf( PRINT_HIGH, "YOU HAVE LEVELED UP!\n");
+	if (ent->client->pers.lvl % 3 == 0)
+	{
+		ent->client->pers.perks += 1;
+		gi.bprintf(PRINT_HIGH, "NEW PERKS AVAILABLE!\n");
+	}
+
+	
+}
+
+void Cmd_Level_Skill(edict_t* ent, int* stat, char* stat_name)
+{
+	int increase;
+	char* name;
+
+	//Check if player has skill points.
+	if (ent->client->pers.sp == 0)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You do have no skill points to spend.\n");
+		return;
+	}
+
+	name = gi.args();
+
+	//Check if numerical.
+	if (!isnum(name))
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Invalid argument provided: '%s'\n", name);
+		return;
+	}
+
+	increase = atoi(name);
+
+	if (increase < 0 )
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You cannot allocate negative skill points.\n");
+		return;
+	}
+
+	if (increase > ent->client->pers.sp)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You do not have %i skill points to allocate.\nAllocating %i skill points instead.\n", increase, ent->client->pers.sp);
+		increase = ent->client->pers.sp;
+	}
+
+	*stat += increase;
+	ent->client->pers.sp -= increase;
+
+	gi.cprintf(ent, PRINT_HIGH, "%s has been increased by %d to %d.\n", stat_name, increase, *stat);
+	gi.cprintf(ent, PRINT_HIGH, "You have %d skill points remaining.\n", ent->client->pers.sp);
+}
+
+void Cmd_Unlock_Perk(edict_t* ent, qboolean* perk, char* perk_name)
+{
+	//Check if player has the perk already.
+	if (*perk)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You already have the perk %S.\n", perk_name);
+		return;
+	}
+
+
+	if (ent->client->pers.perks <= 0)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You are not able to unleck a perk at this time.\n");
+		return;
+	}
+
+	*perk = true;
+
+	gi.cprintf(ent, PRINT_HIGH, "You have unlocked the perk %s.\n", perk_name);
 }
 
 /*
@@ -1238,6 +1308,32 @@ void ClientCommand (edict_t *ent)
 		Cmd_Set_Stat(ent, &(ent->client->pers.lck), "Luck");
 	else if (Q_stricmp(cmd, "cheat_level_up") == 0)
 		Cmd_Level_Up(ent);
+	else if (Q_stricmp(cmd, "level_sg") == 0)
+		Cmd_Level_Skill(ent, &(ent->client->pers.small_guns), "Small Guns");
+	else if (Q_stricmp(cmd, "level_bg") == 0)
+		Cmd_Level_Skill(ent, &(ent->client->pers.big_guns), "Big Guns");
+	else if (Q_stricmp(cmd, "level_ew") == 0)
+		Cmd_Level_Skill(ent, &(ent->client->pers.energy_wep), "Energy Weapons");
+	else if (Q_stricmp(cmd, "level_tr") == 0)
+		Cmd_Level_Skill(ent, &(ent->client->pers.traps), "Traps");
+	else if (Q_stricmp(cmd, "level_fa") == 0)
+		Cmd_Level_Skill(ent, &(ent->client->pers.first_aid), "First Aid");
+	else if (Q_stricmp(cmd, "level_om") == 0)
+		Cmd_Level_Skill(ent, &(ent->client->pers.outdoorsman), "Outdoorsman");
+	else if (Q_stricmp(cmd, "bloody_mess") == 0)
+		Cmd_Unlock_Perk(ent, &(ent->client->pers.bloody_mess), "Bloody Mess");
+	else if (Q_stricmp(cmd, "begin_special") == 0)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You have six SPECIAL stats:\nStrength, Perception, Endurance, Intelligence, Agility, & Luck\nBefore you begin, you must assign your points.\n");
+		gi.cprintf(ent, PRINT_HIGH, "You have %d SPECIAL points to assign.\n", ent->client->pers.sp);
+		gi.cprintf(ent, PRINT_HIGH, "You can use the command set_special to set all six stats at once or you can set each stat individually using the associated command, like set_str or set_agl.\n");
+	}
+	else if (Q_stricmp(cmd, "level_up") == 0)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You have six skills to level up:\nSmall Guns, Big Guns, Energy Weapons, Traps, First Aid, & Outdoorsman\nTo level up skills, you spend skill points\n");
+		gi.cprintf(ent, PRINT_HIGH, "You have %d skill points to allocate.\n", ent->client->pers.sp);
+		gi.cprintf(ent, PRINT_HIGH, "You can level up each skill using the associated command, like level_sg or level_om.\n");
+	}
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

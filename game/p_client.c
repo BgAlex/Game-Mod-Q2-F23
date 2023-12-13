@@ -622,7 +622,7 @@ void UpdateSkills(gclient_t* client)
 	client->pers.max_rockets = 20 + (6 * client->pers.str);
 	client->pers.max_grenades = 20 + (6 * client->pers.str);;
 	client->pers.max_cells = 100 + (20 * client->pers.str);
-	client->pers.max_slugs = 20 + (6 * client->pers.str);
+	client->pers.max_slugs = 100 + (20 * client->pers.str);
 }
 
 
@@ -684,13 +684,14 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.lck = 1;
 
 	client->pers.sp = 35;
+	client->pers.perks = 0;
 
 	/* Setting Perks */
-	client->pers.bloody_mess = true;
+	client->pers.bloody_mess = false;
 	client->pers.fast_shot = false;
-	client->pers.rocket_maestro = true;
+	client->pers.rocket_maestro = false;
 	client->pers.aquaman = false;
-	client->pers.glass_cannon = true;
+	client->pers.glass_cannon = false;
 
 	UpdateSkills(client);
 

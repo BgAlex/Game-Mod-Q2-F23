@@ -377,11 +377,11 @@ void StatScreen(edict_t* ent)
 			strcat(p_perks, "None");
 
 		/* Player Skills */
-		sprintf(p_skills, "Sml Guns: %i   Doctor: %i\nBig Guns: %i Outdrsmn: %i\nNRG Weps: %i    Traps: %i\nSkill Points: %i",
+		sprintf(p_skills, "Sml Guns: %i Frst Aid: %i\nBig Guns: %i Outdrsmn: %i\nNRG Weps: %i    Traps: %i\nSkill Points: %i Perks: %i",
 			ent->client->pers.small_guns, ent->client->pers.first_aid,
 			ent->client->pers.big_guns, ent->client->pers.outdoorsman,
 			ent->client->pers.energy_wep, ent->client->pers.traps,
-			ent->client->pers.sp);
+			ent->client->pers.sp, ent->client->pers.perks);
 	}
 	else
 	{
