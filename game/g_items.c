@@ -473,7 +473,8 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count)
 	if (ent->client->pers.inventory[index] == max)
 		return false;
 
-	ent->client->pers.inventory[index] += count;
+	
+	ent->client->pers.inventory[index] += (count * (ent->client->pers.outdoorsman / 50.0));
 
 	if (ent->client->pers.inventory[index] > max)
 		ent->client->pers.inventory[index] = max;
